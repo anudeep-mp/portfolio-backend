@@ -7,14 +7,22 @@ import (
 	"os"
 
 	"github.com/anudeep-mp/portfolio-backend/router"
+	"github.com/rs/cors"
 )
 
 func main() {
 	port := os.Getenv("PORT")
-	r := router.Router()
+
+	routeHandler := router.Router()
+
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:7777", "https://anufolio-2point0.netlify.app"},
+	})
+
+	handler := corsHandler.Handler(routeHandler)
 
 	fmt.Println("Server is getting ready")
-	http.ListenAndServe(":"+port, r)
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 	fmt.Printf("Listening at port %v", port)
 
 }
