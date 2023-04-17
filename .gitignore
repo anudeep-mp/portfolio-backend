@@ -10,8 +10,6 @@
 
 # Dependency directories (remove the ones you don't use)
 /vendor/
-/go.mod
-/go.sum
 
 # Output of go coverage tool
 *.out
