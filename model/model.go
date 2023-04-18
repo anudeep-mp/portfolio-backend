@@ -9,3 +9,8 @@ type Message struct {
 	Subject string             `json:"subject,omitempty"`
 	Message string             `json:"message,omitempty"`
 }
+
+type WatchStamp struct {
+	ID        primitive.ObjectID  `json:"id,omitempty" bson:"_id,omitempty"`
+	WatchTime primitive.Timestamp `json:"watchTime,omitempty"`
+}

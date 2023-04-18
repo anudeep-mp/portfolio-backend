@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/anudeep-mp/portfolio-backend/helper"
@@ -33,14 +34,12 @@ func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
+	messages := []model.Message{{}}
+
 	messages, err := helper.GetMessages()
 
 	if err != nil {
 		utilities.ResponseWrapper(w, http.StatusInternalServerError, false, err.Error(), nil)
-	}
-
-	if len(messages) == 0 {
-		messages = []model.Message{{}} // initialize messages as an empty slice
 	}
 
 	utilities.ResponseWrapper(w, http.StatusOK, true, "Messages fetched successfully", messages)
@@ -56,4 +55,16 @@ func DeleteAllMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utilities.ResponseWrapper(w, http.StatusOK, true, "All messages deleted successfully", nil)
+}
+
+func WatchStampHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Allow-Control-Allow-Methods", "POST")
+
+	var watchStamp model.WatchStamp
+
+	_ = json.NewDecoder(r.Body).Decode(&watchStamp)
+
+	fmt.Printf("Watch stamp request received  : %v", watchStamp)
+
+	helper.PostWatchStamp(watchStamp)
 }

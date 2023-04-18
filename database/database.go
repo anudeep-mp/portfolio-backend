@@ -11,7 +11,8 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Collection *mongo.Collection
+var MessagesCollection *mongo.Collection
+var TrackingCollection *mongo.Collection
 
 func init() {
 
@@ -27,5 +28,6 @@ func init() {
 
 	fmt.Println("MongoDB Connection Succesful")
 
-	Collection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("COLLECTION_NAME")))
+	MessagesCollection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("MESSAGES_COLLECTION_NAME")))
+	TrackingCollection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("TRACKING_COLLECTION_NAME")))
 }

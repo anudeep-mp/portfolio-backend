@@ -13,7 +13,7 @@ import (
 )
 
 func InsertMessage(message model.Message) (primitive.ObjectID, error) {
-	inserted, err := database.Collection.InsertOne(context.Background(), message)
+	inserted, err := database.MessagesCollection.InsertOne(context.Background(), message)
 
 	insertedId := inserted.InsertedID.(primitive.ObjectID)
 	if err != nil {
@@ -53,7 +53,7 @@ func SendMail(message model.Message) error {
 }
 
 func GetMessages() ([]model.Message, error) {
-	cursor, err := database.Collection.Find(context.Background(), bson.D{})
+	cursor, err := database.MessagesCollection.Find(context.Background(), bson.D{})
 
 	if err != nil {
 		return nil, fmt.Errorf("error finding messages: %w", err)
@@ -81,10 +81,14 @@ func GetMessages() ([]model.Message, error) {
 }
 
 func DeleteAllMessages() error {
-	_, err := database.Collection.DeleteMany(context.Background(), bson.D{{}})
+	_, err := database.MessagesCollection.DeleteMany(context.Background(), bson.D{{}})
 
 	if err != nil {
 		return fmt.Errorf("failed to delete messages: %w", err)
 	}
 	return nil
+}
+
+func PostWatchStamp(watchStamp model.WatchStamp) {
+	database.TrackingCollection.InsertOne(context.Background(), watchStamp)
 }
