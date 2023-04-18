@@ -3,23 +3,28 @@ package helper
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/smtp"
 	"os"
 
 	"github.com/anudeep-mp/portfolio-backend/database"
 	"github.com/anudeep-mp/portfolio-backend/model"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func InsertMessage(message model.Message) {
+func InsertMessage(message model.Message) (primitive.ObjectID, error) {
 	inserted, err := database.Collection.InsertOne(context.Background(), message)
-	CheckError(err)
 
-	fmt.Println("Inserted one result : ", inserted.InsertedID)
+	insertedId := inserted.InsertedID.(primitive.ObjectID)
+	if err != nil {
+		return primitive.NilObjectID, fmt.Errorf("failed to insert message : %s", err)
+	}
 
+	fmt.Println("Inserted one result : ", insertedId)
+	return insertedId, nil
 }
 
-func SendMail(message model.Message) {
+func SendMail(message model.Message) error {
 	auth := smtp.PlainAuth(
 		"",
 		"anudeep.mp7@gmail.com",
@@ -40,11 +45,46 @@ func SendMail(message model.Message) {
 		[]byte(msg),
 	)
 
-	CheckError(err)
+	if err != nil {
+		return fmt.Errorf("failed to send mail: %s", err)
+	}
+
+	return nil
 }
 
-func CheckError(err error) {
+func GetMessages() ([]model.Message, error) {
+	cursor, err := database.Collection.Find(context.Background(), bson.D{})
+
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("error finding messages: %w", err)
 	}
+
+	defer cursor.Close(context.Background())
+
+	var messages []model.Message
+
+	for cursor.Next(context.Background()) {
+		var message model.Message
+
+		if err := cursor.Decode(&message); err != nil {
+			return nil, fmt.Errorf("error decoding message: %w", err)
+		}
+
+		messages = append(messages, message)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, fmt.Errorf("error during cursor iteration: %w", err)
+	}
+
+	return messages, nil
+}
+
+func DeleteAllMessages() error {
+	_, err := database.Collection.DeleteMany(context.Background(), bson.D{{}})
+
+	if err != nil {
+		return fmt.Errorf("failed to delete messages: %w", err)
+	}
+	return nil
 }

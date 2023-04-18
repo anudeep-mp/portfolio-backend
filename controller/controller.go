@@ -6,22 +6,54 @@ import (
 
 	"github.com/anudeep-mp/portfolio-backend/helper"
 	"github.com/anudeep-mp/portfolio-backend/model"
+	"github.com/anudeep-mp/portfolio-backend/utilities"
 )
 
-func ServeHome(w http.ResponseWriter, r *http.Request) {
+func ServeHomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("<h1>Welcome to Anudeep's portfolio</h1>"))
 }
 
-func SendMessage(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content", "application/json")
+func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
 
 	var message model.Message
-
 	_ = json.NewDecoder(r.Body).Decode(&message)
 
-	helper.InsertMessage(message)
-	helper.SendMail(message)
+	insertedId, errorInsertingMessage := helper.InsertMessage(message)
 
-	json.NewEncoder(w).Encode("Message sent successfully")
+	message.ID = insertedId
+
+	if err := helper.SendMail(message); err != nil || errorInsertingMessage != nil {
+		utilities.ResponseWrapper(w, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+
+	utilities.ResponseWrapper(w, http.StatusCreated, true, "Message sent successfully", message)
+}
+
+func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
+
+	messages, err := helper.GetMessages()
+
+	if err != nil {
+		utilities.ResponseWrapper(w, http.StatusInternalServerError, false, err.Error(), nil)
+	}
+
+	if len(messages) == 0 {
+		messages = []model.Message{{}} // initialize messages as an empty slice
+	}
+
+	utilities.ResponseWrapper(w, http.StatusOK, true, "Messages fetched successfully", messages)
+}
+
+func DeleteAllMessagesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
+
+	err := helper.DeleteAllMessages()
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+
+	utilities.ResponseWrapper(w, http.StatusOK, true, "All messages deleted successfully", nil)
 }

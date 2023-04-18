@@ -26,9 +26,3 @@ func main() {
 	fmt.Printf("Listening at port %v", port)
 
 }
-
-func CheckError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
