@@ -1,8 +1,6 @@
 package router
 
 import (
-	"log"
-
 	"github.com/anudeep-mp/portfolio-backend/controller"
 	"github.com/gorilla/mux"
 )
@@ -10,14 +8,11 @@ import (
 func Router() *mux.Router {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/", controller.ServeHome).Methods("GET")
-	router.HandleFunc("/api/sendmessage", controller.SendMessage).Methods("POST")
+	router.HandleFunc("/", controller.ServeHomeHandler).Methods("GET")
+	router.HandleFunc("/api/sendmessage", controller.SendMessageHandler).Methods("POST")
+	router.HandleFunc("/api/messages", controller.GetMessagesHandler).Methods("GET")
+	router.HandleFunc("/api/messages", controller.DeleteAllMessagesHandler).Methods("DELETE")
+	router.HandleFunc("/api/track", controller.WatchStampHandler).Methods("POST")
 
 	return router
-}
-
-func CheckError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
 }

@@ -3,35 +3,31 @@ package database
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 
+	"github.com/anudeep-mp/portfolio-backend/utilities"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Collection *mongo.Collection
+var MessagesCollection *mongo.Collection
+var TrackingCollection *mongo.Collection
 
 func init() {
 
 	//load env variables
 	err := godotenv.Load()
-	CheckError(err)
+	utilities.CheckError(err)
 
 	//mongo db connection
 	clientOption := options.Client().ApplyURI(os.Getenv("MONGO_DB_CONNECTION_STRING"))
 	client, err := mongo.Connect(context.TODO(), clientOption)
 
-	CheckError(err)
+	utilities.CheckError(err)
 
 	fmt.Println("MongoDB Connection Succesful")
 
-	Collection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("COLLECTION_NAME")))
-}
-
-func CheckError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
+	MessagesCollection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("MESSAGES_COLLECTION_NAME")))
+	TrackingCollection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("TRACKING_COLLECTION_NAME")))
 }
