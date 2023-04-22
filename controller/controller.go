@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/anudeep-mp/portfolio-backend/helper"
@@ -34,8 +33,6 @@ func SendMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 
-	messages := []model.Message{{}}
-
 	messages, err := helper.GetMessages()
 
 	if err != nil {
@@ -64,7 +61,37 @@ func WatchStampHandler(w http.ResponseWriter, r *http.Request) {
 
 	_ = json.NewDecoder(r.Body).Decode(&watchStamp)
 
-	fmt.Printf("Watch stamp request received  : %v", watchStamp)
+	_, err := helper.PostWatchStamp(watchStamp)
 
-	helper.PostWatchStamp(watchStamp)
+	if err != nil {
+		utilities.ResponseWrapper(w, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+}
+
+func GetWatchStampsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Allow-Control-Allow-Methods", "GET")
+
+	var users []model.UserStamp
+
+	users, err := helper.GetWatchStamps()
+
+	if err != nil {
+		utilities.ResponseWrapper(w, http.StatusInternalServerError, false, err.Error(), nil)
+		return
+	}
+
+	utilities.ResponseWrapper(w, http.StatusOK, true, "Users fetched successfully", users)
+}
+
+func DeleteAllWatchStampsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Allow-Control-Allow-Methods", "DELETE")
+
+	err := helper.DeleteAllWatchStamps()
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	}
+
+	utilities.ResponseWrapper(w, http.StatusOK, true, "All users deleted successfully", nil)
 }
