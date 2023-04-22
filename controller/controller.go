@@ -61,14 +61,12 @@ func WatchStampHandler(w http.ResponseWriter, r *http.Request) {
 
 	_ = json.NewDecoder(r.Body).Decode(&watchStamp)
 
-	user, err := helper.PostWatchStamp(watchStamp)
+	_, err := helper.PostWatchStamp(watchStamp)
 
 	if err != nil {
 		utilities.ResponseWrapper(w, http.StatusInternalServerError, false, err.Error(), nil)
 		return
 	}
-
-	utilities.ResponseWrapper(w, http.StatusOK, true, "Added user document succesfully", user)
 }
 
 func GetWatchStampsHandler(w http.ResponseWriter, r *http.Request) {
