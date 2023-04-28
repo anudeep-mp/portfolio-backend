@@ -29,5 +29,4 @@ func init() {
 	fmt.Println("MongoDB Connection Succesful")
 
 	MessagesCollection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("MESSAGES_COLLECTION_NAME")))
-	TrackingCollection = (*mongo.Collection)(client.Database(os.Getenv("DB_NAME")).Collection(os.Getenv("TRACKING_COLLECTION_NAME")))
 }
